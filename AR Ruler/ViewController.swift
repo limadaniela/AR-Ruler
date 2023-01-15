@@ -16,6 +16,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     //to keep track of all the dotNodes that we put onto de scene
     var dotNodes = [SCNNode]()
     
+    var textNode = SCNNode()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -44,7 +46,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     //tells object that new touches occurred in a view or window
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        //to detect tpuch location
+        
+        //if tap the scene a third time, it will remove the previous 2 dots
+        if dotNodes.count >= 2 {
+            for dot in dotNodes {
+                dot.removeFromParentNode()
+            }
+            //to initialize and empty array
+            dotNodes = [SCNNode]()
+        }
+        
+        //to detect touch location
         guard let touchLocation = touches.first?.location(in: sceneView) else {return}
         //to convert touch location into 3D location inside our scene
         guard let query = sceneView.raycastQuery(from: touchLocation, allowing: .existingPlaneGeometry, alignment: .any) else {return}
@@ -97,9 +109,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func updateText(text: String, atPosition position: SCNVector3) {
+        
+        //to remove textNode every time we call updateText
+        textNode.removeFromParentNode()
+        
         let textGeometry = SCNText(string: text, extrusionDepth: 1.0)
         textGeometry.firstMaterial?.diffuse.contents = UIColor.red
-        let textNode = SCNNode(geometry: textGeometry)
+        textNode = SCNNode(geometry: textGeometry)
         //give textNode a position
         textNode.position = SCNVector3(position.x, position.y + 0.01, position.z)
         //to reduce the size of 3D text
@@ -108,5 +124,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.scene.rootNode.addChildNode(textNode)
     }
 }
+
 
 
